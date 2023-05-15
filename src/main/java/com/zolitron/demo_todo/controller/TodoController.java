@@ -1,6 +1,7 @@
 package com.zolitron.demo_todo.controller;
 
 import com.zolitron.demo_todo.model.Todo;
+import com.zolitron.demo_todo.model.User;
 import com.zolitron.demo_todo.services.TodoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -18,20 +19,22 @@ public class TodoController {
         return todoService.getAllTodos();
     }
     @GetMapping("/{id}")
-    public Todo getTodoById(@PathVariable int id) {
+    public Todo getTodoById(@PathVariable Long id) {
         return todoService.getTodoById(id);
     }
     @PatchMapping("/{id}")
-    public Todo updateTask(@PathVariable int id,
+    public Todo updateTask(@PathVariable Long id,
                            @RequestBody String newTask){
         return todoService.updateTask(id, newTask);
     }
-    @PostMapping
-    public Todo createATodo(@RequestBody String task){
-        return todoService.createTodo(task);
+    @PostMapping("/user/{Id}")
+    public Todo createTodoForUser(@PathVariable Long Id,
+                                  @RequestBody String task){
+        System.out.println(Id);
+        return todoService.createTodo(Id, task);
     }
     @DeleteMapping("/{id}")
-    public List<Todo> deleteTodo(@PathVariable int id){
+    public List<Todo> deleteTodo(@PathVariable Long id){
         return todoService.removeTask(id);
     }
 }
