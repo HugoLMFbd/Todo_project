@@ -38,33 +38,47 @@ public class TodoService {
 
     }
 
-    public Todo getTodoById(Long id) throws EntityNotFoundException {
-        Optional<Todo> optionalTodo = todoRepository.findById(id);
-        if (optionalTodo.isPresent()) {
-            return optionalTodo.get();
+    public List<Todo> getAllTodosByUser(Long id) throws EntityNotFoundException {
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            return user.getTodos();
         }
-        throw new EntityNotFoundException("Todo with id " + id + "not found!");
+        throw new EntityNotFoundException("User with id " + id + " not found!");
     }
-    public List<Todo> getAllTodos(){
-        return todoRepository.findAll();
-    }
-    public Todo updateTask(Long id , String newTask) throws EntityNotFoundException {
-        Optional<Todo> optionalTodo = todoRepository.findById(id);
-        if (optionalTodo.isPresent()){
+
+    public Todo updateTask(Long userId, String newTask, Long todoId) throws EntityNotFoundException {
+        List<Todo> todoList = getAllTodosByUser(userId);
+        if (!todoList.isEmpty()) {
+            Optional<Todo> optionalTodo = todoList.stream().filter(todo -> todo.getId().equals(todoId)).findFirst();
+            if (optionalTodo.isPresent()) {
                 Todo toUpdateTodo = optionalTodo.get();
                 toUpdateTodo.setTask(newTask);
                 toUpdateTodo = todoRepository.save(toUpdateTodo);
                 return toUpdateTodo;
+            } else {
+                throw new EntityNotFoundException("Todo with id " + todoId + " not found!");
             }
-        throw new EntityNotFoundException("Todo with id " + id + " not found!");
+        } else {
+            throw new RuntimeException("The list of todos is empty for user with ID " + userId);
         }
-    public List<Todo> removeTask(Long id) throws EntityNotFoundException {
-        Optional<Todo> optionalTodo = todoRepository.findById(id);
-        if (optionalTodo.isPresent()){
-            Todo to_delete_todo = optionalTodo.get();
-            todoRepository.delete(to_delete_todo);
-            return todoRepository.findAll();
-            }
-        throw new EntityNotFoundException("Todo with id " + id + " not found!");
+    }
+
+    public List<Todo> removeTodo(Long userId, Long todoId) throws EntityNotFoundException {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User with id " + userId + " not found!"));
+
+        List<Todo> todoList = user.getTodos();
+        if (!todoList.isEmpty()) {
+            Todo todo = user.getTodos().stream().filter(t -> t.getId().equals(todoId))
+                    .findFirst()
+                    .orElseThrow(()-> new EntityNotFoundException("Todo with id " + todoId + " not found"));
+            user.getTodos().remove(todo);
+            todo.setUser(null);
+            todoRepository.delete(todo);
+            return user.getTodos();
+        } else {
+            throw new RuntimeException("The list of todos is empty for user with ID " + userId);
+        }
     }
 }

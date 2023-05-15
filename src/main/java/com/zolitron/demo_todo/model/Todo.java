@@ -16,7 +16,7 @@ public class Todo {
     private String task;
 
     public Todo() {}
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     @JsonBackReference
     private User user;

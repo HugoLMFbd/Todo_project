@@ -1,8 +1,8 @@
 package com.zolitron.demo_todo.controller;
 
 import com.zolitron.demo_todo.model.Todo;
-import com.zolitron.demo_todo.model.User;
 import com.zolitron.demo_todo.services.TodoService;
+import com.zolitron.demo_todo.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,29 +13,29 @@ import java.util.List;
 public class TodoController {
     @Autowired
     private TodoService todoService;
+    @Autowired
+    private UserService userService;
 
-    @GetMapping
-    public List<Todo> getAllTodos(){
-        return todoService.getAllTodos();
+    @GetMapping("user/{id}")
+    public List<Todo> getAllUserTodos(@PathVariable Long id){
+        return todoService.getAllTodosByUser(id);
     }
-    @GetMapping("/{id}")
-    public Todo getTodoById(@PathVariable Long id) {
-        return todoService.getTodoById(id);
-    }
-    @PatchMapping("/{id}")
-    public Todo updateTask(@PathVariable Long id,
+
+    @PatchMapping("/user/{userId}/todo/{todoId}")
+    public Todo updateTask(@PathVariable Long userId,
+                           @PathVariable Long todoId,
                            @RequestBody String newTask){
-        return todoService.updateTask(id, newTask);
+        return todoService.updateTask(userId, newTask, todoId);
     }
     @PostMapping("/user/{Id}")
     public Todo createTodoForUser(@PathVariable Long Id,
                                   @RequestBody String task){
-        System.out.println(Id);
         return todoService.createTodo(Id, task);
     }
-    @DeleteMapping("/{id}")
-    public List<Todo> deleteTodo(@PathVariable Long id){
-        return todoService.removeTask(id);
+    @DeleteMapping("/user/{userId}/todo/{todoId}")
+    public List<Todo> deleteTodo(@PathVariable Long userId,
+                                 @PathVariable Long todoId){
+        return todoService.removeTodo(userId, todoId);
     }
 }
 
